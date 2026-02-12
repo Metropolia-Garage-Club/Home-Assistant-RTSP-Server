@@ -7,7 +7,6 @@ streams:
   - rtsp://admin:aiot2024@192.168.50.50:554/h264Preview_01_main
   Raspberrypi_cam:
   - rtsp://192.168.50.163:8554/rpi_camera
-  - ffmpeg:iphone_cam#video=h264#width=1920#height=1080#bitrate=2000k#framerate=30
   web_cam:
   - ffmpeg:device=/dev/video0
 webrtc:
