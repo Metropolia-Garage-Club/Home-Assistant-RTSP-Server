@@ -108,25 +108,18 @@ You should see:
 
 
 ## Configuration 
-### Go2RTC Configuration (go2rtc/config/go2rtc.yaml) 
+## Go2RTC Configuration
+*Configuration file:* [software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml](software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml)
+
+Edit this file to configure your camera streams:
 
 ```text
+yaml
 streams: 
   iphone_cam: 
     - rtsp://camera_ip:8554/stream 
   mobile_cam_2: 
     - rtsp://camera_ip:8554/ 
-  camera_3: 
-    - rtsp://admin:aiot2024@192.168.50.50:554/h264Preview_01_main 
-  raspberrypi_cam: 
-    - rtsp://camera_ip:8554/rpi_camera 
-    
-webrtc: 
-  listen: ":8555"   
-api: 
-  listen: ":1984"   
-log: 
-  level: debug
 ```
 
 
@@ -137,113 +130,45 @@ log:
 - Stream names must match the names used in Home Assistant 
 
 
-### Go2RTC Dockerfile (go2rtc/Dockerfile) 
+### Go2RTC Dockerfile 
 
-```text
-# Use Alpine Linux (small, lightweight) 
-FROM alpine:latest 
- 
-# Install dependencies 
-RUN apk add --no-cache \ 
-    wget \ 
-    ca-certificates \ 
-    ffmpeg 
- 
-# Download Go2RTC 
-RUN wget -O /usr/local/bin/go2rtc \ 
-    https://github.com/AlexxIT/go2rtc/releases/latest/download/go2rtc_linux_amd64 && \ 
-    chmod +x /usr/local/bin/go2rtc 
- 
-# Create config directory 
-RUN mkdir -p /config 
- 
-# Expose ports 
-EXPOSE 1984 8554 8555 
- 
-# Set working directory 
-WORKDIR /config 
- 
-# Run Go2RTC 
-CMD ["go2rtc", "-config", "/config/go2rtc.yaml"] 
-```
+*Dockerfile:* [software/deployment/camera-streaming/go2rtc/Dockerfile](software/deployment/camera-streaming/go2rtc/Dockerfile)
+
+This Dockerfile sets up Go2RTC in an Alpine Linux container with FFmpeg support.
 
 
-### Home Assistant Configuration (home-assistant/config/configuration.yaml) 
+### Home Assistant Configuration
 
-```text
-# Loads default set of integrations 
-default_config: 
- 
-# Enable Stream integration 
-stream: 
- 
-# Automation 
-automation: !include automations.yaml 
-script: !include scripts.yaml 
-scene: !include scenes.yaml 
- 
-# Logger 
-logger: 
-  default: info 
-  logs: 
-    homeassistant.core: info 
-    homeassistant.components.camera: debug 
-    homeassistant.components.stream: debug 
-```
+*Configuration file:* [software/deployment/camera-streaming/home-assistant/config/configuration.yaml](software/deployment/camera-streaming/home-assistant/config/configuration.yaml)
+
+Key configurations included:
+- Default integrations
+- Stream integration for camera support
+- Debug logging for camera and stream components
+
+*Additional configuration files:*
+- [automations.yaml](software/deployment/camera-streaming/home-assistant/config/automations.yaml)
+- [scripts.yaml](software/deployment/camera-streaming/home-assistant/config/scripts.yaml)
+- [scenes.yaml](software/deployment/camera-streaming/home-assistant/config/scenes.yaml)
 
 
-### Home Assistant Dockerfile (home-assistant/Dockerfile) 
+### Home Assistant Dockerfile 
 
-```text
-FROM ghcr.io/home-assistant/home-assistant:stable 
- 
-ENV TZ=Europe/Helsinki 
- 
-COPY ./config /config
-```
+*Dockerfile:* [software/deployment/camera-streaming/home-assistant/Dockerfile](software/deployment/camera-streaming/home-assistant/Dockerfile)
+
+Uses the official Home Assistant stable image with Helsinki timezone.
 
 
-### Docker Compose Configuration (docker-compose.yml) 
+### Docker Compose Configuration
 
-```text
-services: 
-  go2rtc: 
-    build: 
-      context: ./go2rtc 
-      dockerfile: Dockerfile 
-    container_name: go2rtc 
-    ports: 
-      - "1984:1984"   # API 
-      - "8554:8554"   # RTSP 
-      - "8555:8555"   # WebRTC 
-    volumes: 
-      - ./go2rtc/config/go2rtc.yaml:/config/go2rtc.yaml:ro 
-    restart: unless-stopped 
-    networks: 
-      - streaming-network 
- 
-  homeassistant: 
-    build: 
-      context: ./home-assistant 
-      dockerfile: Dockerfile 
-    container_name: homeassistant 
-    restart: unless-stopped 
-    ports: 
-      - "8123:8123" 
-    volumes: 
-      - ./home-assistant/config:/config 
-    environment: 
-      - TZ=Europe/Helsinki 
-    networks: 
-      - streaming-network 
-    depends_on: 
-      - go2rtc 
- 
-networks: 
-  streaming-network: 
-    driver: bridge 
+*Docker Compose file:* [software/deployment/camera-streaming/docker-compose.yml](software/deployment/camera-streaming/docker-compose.yml)
 
-```
+Defines two services:
+- *go2rtc*: RTSP to WebRTC relay (ports 1984, 8554, 8555)
+- *homeassistant*: Home automation platform (port 8123)
+
+Both services run on an isolated streaming-network bridge network.
+
 
 
 ## usage
@@ -286,12 +211,9 @@ networks:
    
 	  url: Camera_3
 
-
-  - Note: The url field should match the stream name defined in your go2rtc.yaml file.
-
+*Note:* The url field should match the stream name defined in your [go2rtc.yaml](software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml) file.
 
 ### Viewing Camera Streams 
-
 Once configured, you can: 
 
 - View all camera streams on your Home Assistant dashboard 
@@ -335,29 +257,32 @@ Home-Assistant-RTSP-Server/
 
 1. Verify WebRTC candidate IP matches your host IP 
 2. Ensure port 8555 is accessible from your network 
-3. Check Home Assistant logs: 
+3. Check Home Assistant logs:
+bash
    docker logs homeassistant  
-4. Verify the stream name in dashboard card matches go2rtc.yaml 
+4. Verify the stream name in dashboard card matches [go2rtc.yaml](software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml) 
 
 
 ### Container Won't Start 
 
 1. Check for port conflicts: 
    netstat -tulpn | grep -E '1984|8123|8554|8555' 
-2. Verify Docker daemon is running: 
+2. Verify Docker daemon is running:
+bash
    docker ps 
-3. Check container logs: 
+3. Check container logs:
+bash 
    docker-compose logs 
 
 #### Connection Refused Errors 
 
-Ensure both containers are on the same Docker network: 
-
-docker network inspect streaming-network 
-  
-
-1. Verify firewall rules allow connections on required ports 
-2. Check if cameras are reachable from the Docker container: 
+1. Ensure both containers are on the same Docker network:
+ bash
+   docker network inspect streaming-network
+   
+2. Verify firewall rules allow connections on required ports 
+3. Check if cameras are reachable from the Docker container:
+bash
    docker exec -it go2rtc ping <camera-ip>
 
 
@@ -385,6 +310,6 @@ This project is part of a Metropolia University of Applied Sciences internship p
 
 ## Acknowledgments 
 
-- Go2RTC - RTSP to WebRTC relay 
-- Home Assistant - Home automation platform 
+- [Go2RTC](https://github.com/AlexxIT/go2rtc) - RTSP to WebRTC relay 
+- [Home Assistant](https://www.home-assistant.io/) - Home automation platform 
 - Metropolia University of Applied Sciences - Project supervision
