@@ -1,228 +1,315 @@
-# Metropolia Garage Project Template
-## Repository for materials related to Metropolia Garage projects
+# Create a Camera Streaming Pipeline using Go2RTC 
+### Repository for Docker-based RTSP camera streaming solution that integrates multiple IP cameras with Home Assistant using Go2RTC and WebRTC technology. 
 
-This is a repository created to serve as a standard template for all official Metropolia Garage projects. 
-In this repository, you can find the standard project folder structure, project documentation template and guide as well as introduction to how to use git and github.
 
-**Please take the time to read this MD before you start your project!** 
+## Table of Contents
 
-### Required work for course credits
+- [Overview](#overview)
+- [Project Goals](#project-goals)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
+- [Team Members](#team-members)
+- [Acknowledgments](#acknowledgments)
 
-If you are doing project work for AIoT / Robo -garages as part of a course, there are few requirements that **you must fulfill:**
 
-#### Documentation requirements
+## Overview
 
-We expect you to not only properly document your project, but also to write usage instructions. This README file is a great way to easily format and visualize usage and deployment instructions for your project on the repository front page. 
-If you are new to Markdown, refer to this [cheatsheet](https://github.com/adam-p/markdown-here/wiki/markdown-cheatsheet).
+This project implements a reliable RTSP-based camera streaming pipeline using Go2RTC and integrates it with Home Assistant. It enables real-time, low-latency streaming from multiple IP cameras through a Docker-based deployment. 
 
-For the actual project documentation, there is a formatted template in the Docs folder you can use if you want, but you don't need to. The important thing is that the format and language of the documentation follows the Metropolia Thesis guidelines. 
+## Project Goals
 
-*If you are doing your Innovation project report / Thesis, that will act as your project report for the garage! In that case, please upload it with the project files or link to it in theseus.*
+- Stream from multiple RTSP-compatible cameras  
+- Deploy Go2RTC as a containerized streaming relay  
+- Integrate streams with Home Assistant using WebRTC  
+- Create a scalable, reproducible deployment using Docker Compose
 
-The report should include atleast the following:
 
-- What was the project about?
-- What are the things you did?
-- What choices did you make with your implementation and why? (Eg. choices between different software / libraries)
-- What were the problems you faced and how did you solve them?
-- What work remains to be done or what issues need to be fixed?
+## Features
 
+- Multi-Camera Support  
+- WebRTC Low-Latency Playback  
+- Docker-Based Deployment  
+- Real-Time Streaming  
+- Dedicated Docker Network Isolation
 
-And finally, list the tools/software you used for the project and provide brief description of what each of them are for. 
+  
+## Architecture
 
-In general, the project report should be technical in nature. Focus on writing about the technical implementations. This will be important for the garage as well as the companies, which might want to implement your project into their systems. Describe all the systems and sub-systems of your work in clear manner. Creating a program flowchart is also very appreciated!
+![Streaming Pipeline Flowchart](Flowchart.png)
 
-You are the expert of your own project and it is critical that the work and innovation you have spent your time on is easily available to us in the future! 
 
+## Prerequisites 
 
-### How to proceed
-If you don't have Git installed yet, refer to [setting up Git](https://docs.github.com/en/get-started/git-basics/set-up-git).
+- Docker (version 20.10 or higher) 
+- Docker Compose (version 1.29 or higher) 
+- RTSP-compatible IP cameras or RTSP camera apps 
+- Network access to camera streams 
 
-We highly recommend you to start with the amazing [First Contributions](https://github.com/firstcontributions/first-contributions) guide if you are new to GitHub. 
 
-This template is made with forking and pull requests in mind to systemize workflow and make it easy for Metropolia Staff to access your project later, while allowing you to work as freely as possible.
+## Installation 
+### Step 1: Clone the Repository 
 
-#### Expected Workflow:
-![Flowchart for project](project_flow.png)
+[Home Assistant RTSP Server](https://github.com/Metropolia-Garage-Club/Home-Assistant-RTSP-Server)
 
-### Project structure
+cd Home-Assistant-RTSP-Server 
 
-In this project template, you can find a readymade folder structure. Your project may not need some of the folders, in which case please delete them. 
-**Otherwise, use the provided structure.**
 
-#### Overview of the folders
+### Step 2: Directory Structure 
 
-##### Deployment
-* Any files or general dependencies that are necessary to get the project running
+```text
+C:\Home-Assistant-RTSP-Server\
+└── software\
+    └── deployment\
+        └── camera-streaming\
+            ├── docker-compose.yml
+            ├── go2rtc\
+            │   ├── Dockerfile
+            │   └── config\
+            │       └── go2rtc.yaml
+            └── home-assistant\
+                ├── Dockerfile
+                └── config\
+                    ├── configuration.yaml
+                    ├── automations.yaml
+                    ├── scripts.yaml
+                    └── scenes.yaml
+```
 
-##### Docs
-* Project Report, Notes, Guides, you can find the Word Documentation Template here with basic formatting made
 
-##### Firmware
-* Files and software, which are necessary to get your hardware running
+### Step 3: Deploy with Docker Compose 
 
-##### Hardware
-* Schematics, parts and other things related to your project hardware
+docker-compose up 
 
-##### Media
-*  All media material related to the project, sorted
+This will: 
 
-##### Presentation
-*  Your powerpoint presentations, if you have any
+- Build the Go2RTC and Home Assistant Docker images 
+- Start both containers 
+- Create a dedicated Docker network for communication
 
-##### References
-*  Scientific papers, datasheets, web links - Please name them in a clear manner
 
-##### Software
-*  Your actual code, models, libraries etc.
+### Step 4: Verify Deployment 
 
-#### Example project structure
+Check that both containers are running: 
 
-1.  Project-Name/   
+docker ps 
 
- 2. │   
+You should see: 
 
- 3. ├──  docs/            # Documentation and reports   
+- go2rtc container running on ports 1984, 8554, 8555 
+- homeassistant container running on port 8123 
 
- 4. │   ├── project-report.docx   # Main project report   
 
- 5. │   ├── requirements.txt  	# Project requirements & specs     
+## Configuration 
+## Go2RTC Configuration
+*Configuration file:* [software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml](software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml)
 
- 9. │      
+Edit this file to configure your camera streams:
 
-11. ├──  software/    # AI, IoT, and application code
-24. │   ├──  deployment/ # Deployment files, Docker, cloud configurations   
+```text
+yaml
+streams: 
+  iphone_cam: 
+    - rtsp://camera_ip:8554/stream 
+  mobile_cam_2: 
+    - rtsp://camera_ip:8554/ 
+```
 
-25. │   │   ├── docker/   
 
-26. │   │   ├── k8s/   
+#### Configuration Notes: 
 
-27. │   │   ├── cloud-setup/       
+- Replace camera IP addresses with your actual camera IPs 
+- For cameras requiring authentication, use the format: rtsp://username:password@ip:port/path 
+- Stream names must match the names used in Home Assistant 
 
-14. │   ├── models/      # AI/ML models and training scripts   
 
-15. │   ├── code/     # Project source code, helper scripts, automation   
+### Go2RTC Dockerfile 
 
-16. │   ├── tests/       # Unit tests, integration tests   
+*Dockerfile:* [software/deployment/camera-streaming/go2rtc/Dockerfile](software/deployment/camera-streaming/go2rtc/Dockerfile)
 
-17. │   ├── README.md    # Explanation of software structure   
+This Dockerfile sets up Go2RTC in an Alpine Linux container with FFmpeg support.
 
-18. │   │   
 
-19. │   ├──  firmware/  # Microcontroller firmware (if any)   
+### Home Assistant Configuration
 
-20. │   │   ├── esp32/   
+*Configuration file:* [software/deployment/camera-streaming/home-assistant/config/configuration.yaml](software/deployment/camera-streaming/home-assistant/config/configuration.yaml)
 
-21. │   │   ├── jetson/   
+Key configurations included:
+- Default integrations
+- Stream integration for camera support
+- Debug logging for camera and stream components
 
-22. │   │   ├── raspberry-pi/   
+*Additional configuration files:*
+- [automations.yaml](software/deployment/camera-streaming/home-assistant/config/automations.yaml)
+- [scripts.yaml](software/deployment/camera-streaming/home-assistant/config/scripts.yaml)
+- [scenes.yaml](software/deployment/camera-streaming/home-assistant/config/scenes.yaml)
 
-28. │   
 
-29. ├──  hardware/      # Any hardware-related files   
+### Home Assistant Dockerfile 
 
-30. │   ├── schematics/      # Circuit diagrams, PCB designs   
+*Dockerfile:* [software/deployment/camera-streaming/home-assistant/Dockerfile](software/deployment/camera-streaming/home-assistant/Dockerfile)
 
-31. │   ├── parts-list.xlsx    # List of components and BOM   
+Uses the official Home Assistant stable image with Helsinki timezone.
 
-32. │   ├── assembly-guide.md  # Instructions for assembling hardware   
 
-33. │   
+### Docker Compose Configuration
 
-34. ├──  media/        # Images, videos, marketing materials   
+*Docker Compose file:* [software/deployment/camera-streaming/docker-compose.yml](software/deployment/camera-streaming/docker-compose.yml)
 
-35. │   ├──  photos/         # Pictures of the project   
+Defines two services:
+- *go2rtc*: RTSP to WebRTC relay (ports 1984, 8554, 8555)
+- *homeassistant*: Home automation platform (port 8123)
 
-36. │   ├──  videos/         # Any demo or tutorial videos   
+Both services run on an isolated streaming-network bridge network.
 
-37. │   ├──  graphics/       # Logos, banners, presentation materials   
 
-38. │   
 
-39. ├──  presentations/       # Slides, posters, marketing materials   
+## usage
+### Accessing Go2RTC Web Interface 
 
-40. │   ├── presentation.pptx   
+1. Open your browser and navigate to:  
+   [http://localhost:1984](http://localhost:1984)
+2. You should see all configured camera streams listed 
+3. Click on any stream to verify it's working
 
-41. │   ├── poster.pdf   
 
-42. │   
+### Adding Cameras to Home Assistant
+#### Step 1: Add WebRTC Camera Integration
 
-43. ├──  references/          # Papers, useful links, background materials   
+1. Go to Settings → Devices & Services 
+2. Click + Add Integration 
+3. Search for WebRTC Camera 
+4. Click on it to add the integration 
+5. Configure with your host IP address (e.g., 192.168.50.141) 
+6. Complete the setup process
 
-44. │   ├── papers/   
+#### Step 2: Add Camera Cards to Dashboard 
 
-45. │   ├── links.md   
+1. Go to your Home Assistant Dashboard 
+2. Click Edit Dashboard → Add Card 
+3. Select webrtc-camera Card 
+3. Add the following configuration:
+   
+   type: custom:webrtc-camera
+   
+ 	 url: iphone_cam  
+5. Repeat for additional cameras:
+   
+   type: custom:webrtc-camera
+   
+  	url: Mobile_cam_2 
 
-46. │   
+ 
+	  type: custom:webrtc-camera
+   
+	  url: Camera_3
 
-47. ├── .gitignore              # Ignore unnecessary files for version control   
+*Note:* The url field should match the stream name defined in your [go2rtc.yaml](software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml) file.
 
-48. ├── README.md               # General project overview   
+### Viewing Camera Streams 
+Once configured, you can: 
 
-49. └── LICENSE                 # Open-source license, if applicable  
+- View all camera streams on your Home Assistant dashboard 
+- Access streams from mobile devices using the Home Assistant app 
+- Create automations based on camera events
 
-50.   
 
+## Project Structure 
 
-### Using Git
+```text
+Home-Assistant-RTSP-Server/ 
+├── README.md 
+├── docker-compose.yml 
+├── go2rtc/ 
+│   ├── Dockerfile 
+│   └── config/ 
+│       └── go2rtc.yaml 
+└── home-assistant/ 
+    ├── Dockerfile 
+    └── config/ 
+        ├── configuration.yaml 
+        ├── automations.yaml 
+        ├── scripts.yaml 
+        └── scenes.yaml 
+```
 
-#### Getting started
 
-**Fork this repository**: Click the "Fork" button in the top-right corner to create your own copy.
-Then set it up locally, using the CMD line:
->git clone [fork-URL]
+## Troubleshooting 
+### Camera Stream Not Appearing in Go2RTC 
 
-(Downloads a copy of your fork to your local machine)
+1. Verify camera IP address and RTSP URL 
+2. Check network connectivity: 
+   ping <camera-ip> 
+3. Test RTSP stream with VLC or ffplay: 
+   ffplay rtsp://<camera-ip>:<port>/<path> 
+4. Check Go2RTC logs: 
+   docker logs go2rtc 
 
->cd [repository-name]          
 
-(Moves into the project directory)
+### WebRTC Not Working in Home Assistant 
 
->git remote add upstream [project-repository-URL] 
+1. Verify WebRTC candidate IP matches your host IP 
+2. Ensure port 8555 is accessible from your network 
+3. Check Home Assistant logs:
+bash
+   docker logs homeassistant  
+4. Verify the stream name in dashboard card matches [go2rtc.yaml](software/deployment/camera-streaming/go2rtc/config/go2rtc.yaml) 
 
-(Links Git to the original repository (This one))
 
-#### Development Workflow
+### Container Won't Start 
 
-**Create a feature branch**:
+1. Check for port conflicts: 
+   netstat -tulpn | grep -E '1984|8123|8554|8555' 
+2. Verify Docker daemon is running:
+bash
+   docker ps 
+3. Check container logs:
+bash 
+   docker-compose logs 
 
->git checkout -b [new-branch-name]
+#### Connection Refused Errors 
 
-(Creates and switches to a new branch)
+1. Ensure both containers are on the same Docker network:
+ bash
+   docker network inspect streaming-network
+   
+2. Verify firewall rules allow connections on required ports 
+3. Check if cameras are reachable from the Docker container:
+bash
+   docker exec -it go2rtc ping <camera-ip>
 
-**Make your changes** and commit regularly with clear messages:
->git add . 
 
-(Stages all modified files for commit)
 
->git commit -m "Implement feature X"
+## Contributing 
 
-(Records changes with a message)
+Contributions are welcome! Please follow these steps: 
 
-**Merge to your fork's main branch** when you have a stable checkpoint you want to save
+1. Fork the repository 
+2. Create a feature branch (git checkout -b feature/amazing-feature) 
+3. Commit changes (git commit -m 'Add some amazing feature') 
+4. Push to the branch (git push origin feature/amazing-feature) 
+5. Open a Pull Request 
 
->git checkout main                   
 
-(Switch back to your main branch)
+## License 
 
->git merge [new-branch-name]
+This project is part of a Metropolia University of Applied Sciences internship project. 
 
-(Integrate your feature into main)
+## Team Members
 
->git push origin main                
+- Upeksha
+- Lihini
+- Shamila
 
-(Push the updated main to your forked repository)
+## Acknowledgments 
 
-Generally, you want to keep your local main branch as a functional backup and push any feature you are actively working on into its own separate branch. The main branch will be the pull point for the real project repository.
-
-#### Submitting your work to us
-
-**Create a pull request**:
-* Go to this repository
-* Click "Pull requests" > "New pull request"
-* Click "compare across forks"
-* Select your fork's main branch as the head repository
-* Click "Create pull request"
-* Add a title and description explaining your changes
-
-We will accept your changes and they will be copied to this repository. 
+- [Go2RTC](https://github.com/AlexxIT/go2rtc) - RTSP to WebRTC relay 
+- [Home Assistant](https://www.home-assistant.io/) - Home automation platform 
+- Metropolia University of Applied Sciences - Project supervision
